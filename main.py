@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
-import shuti
+import shutil
 import subprocess
 
 app = FastAPI()

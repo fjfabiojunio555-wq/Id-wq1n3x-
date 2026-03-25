@@ -3,37 +3,28 @@ import shutil
 import subprocess
 
 app = FastAPI()
-model = whisper.load_model("base")
+
+@app.get("/")
+def home():
+    return {"status": "ok"}
 
 @app.post("/processar/")
 async def processar(file: UploadFile = File(...)):
-    input_file = file.filename
+    input_file = "input.mp4"
     
     with open(input_file, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    result = model.transcribe(input_file)
+    output = "final.mp4"
 
-    outputs = []
+    comando = [
+        "ffmpeg",
+        "-i", input_file,
+        "-vf", "scale=1080:1920",
+        "-c:a", "aac",
+        output
+    ]
 
-    for i, seg in enumerate(result["segments"][:3]):
-        inicio = seg['start']
-        fim = seg['end']
-        texto = seg['text'].replace("'", "")
+    subprocess.run(comando)
 
-        output = f"final_{i}.mp4"
-
-        comando = [
-            "ffmpeg",
-            "-i", input_file,
-            "-ss", str(inicio),
-            "-to", str(fim),
-            "-vf", f"crop=in_h*9/16:in_h,scale=1080:1920,drawtext=text='{texto}':fontcolor=white:fontsize=40:x=(w-text_w)/2:y=h-120",
-            "-c:a", "aac",
-            output
-        ]
-
-        subprocess.run(comando)
-        outputs.append(output)
-
-    return {"videos": outputs}
+    return {"video": output}

@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
-import shutil
-import whisper
+import shuti
 import subprocess
 
 app = FastAPI()
